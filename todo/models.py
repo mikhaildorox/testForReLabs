@@ -8,7 +8,7 @@ class ToDo(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String)
-    is_complite = Column(Boolean, default=False)
+    is_complete = Column(Boolean, default=False)
 
 
 Base.metadata.create_all(bind=engine)

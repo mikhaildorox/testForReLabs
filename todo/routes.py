@@ -12,6 +12,7 @@ from starlette.status import HTTP_303_SEE_OTHER, HTTP_302_FOUND
 @app.get('/')
 def home(request: Request, db_session: Session = Depends(get_db)):
     todos = db_session.query(ToDo).all()
+
     return templates.TemplateResponse('todo/index.html',
                                       {'request': request,
                                        'app_name': settings.app_name,
@@ -32,7 +33,7 @@ def add(title: str = Form(...), db_session: Session = Depends(get_db)):
 @app.get('/update/{todo_id}')
 def update(todo_id: int, db_session: Session = Depends(get_db)):
     todo = db_session.query(ToDo).filter(ToDo.id == todo_id).first()
-    todo.is_complite = not todo.is_complite
+    todo.is_complete = not todo.is_complete
     db_session.commit()
 
     url = app.url_path_for('home')
@@ -43,6 +44,7 @@ def update(todo_id: int, db_session: Session = Depends(get_db)):
 def delete(todo_id: int, db_session: Session = Depends(get_db)):
     todo = db_session.query(ToDo).filter_by(id=todo_id).first()
     db_session.delete(todo)
+
     db_session.commit()
 
     url = app.url_path_for('home')
