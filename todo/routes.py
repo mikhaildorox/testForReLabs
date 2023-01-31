@@ -1,5 +1,8 @@
-from fastapi import Request, Depends, Form
+from random import uniform
+
+from fastapi import Request, Depends, Form, WebSocket
 from sqlalchemy.orm import Session
+
 from todo.main import app, templates
 from todo.database.base import get_db
 from todo.models import ToDo
@@ -9,8 +12,25 @@ from starlette.responses import RedirectResponse
 from starlette.status import HTTP_303_SEE_OTHER, HTTP_302_FOUND
 
 
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    print('Accepting client connection...')
+    await websocket.accept()
+    while True:
+        try:
+            # Wait for any message from the client
+            await websocket.receive_text()
+            # Send message to the client
+            resp = {'value': uniform(0, 1)}
+            await websocket.send_json(resp)
+        except Exception as e:
+            print('error:', e)
+            break
+    print('Bye..')
+
+
 @app.get('/')
-def home(request: Request, db_session: Session = Depends(get_db)):
+async def home(request: Request, db_session: Session = Depends(get_db)):
     todos = db_session.query(ToDo).all()
 
     return templates.TemplateResponse('todo/index.html',
